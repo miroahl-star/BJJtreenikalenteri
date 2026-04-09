@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🥋 BJJ Training Log</title>
+    <style>
+        :root {
+            --bg: #f8f9fa;
+            --card: #ffffff;
+            --primary: #8B0000; /* BJJ red belt accent */
+            --primary-dark: #660000;
+            --secondary: #2c3e50;
+            --text: #1a1a1a;
+            --text-muted: #6c757d;
+            --border: #dee2e6;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --belt-white: #f8f9fa;
+            --belt-blue: #e3f2fd;
+            --belt-purple: #f3e5f5;
+            --belt-brown: #efebe9;
+            --belt-black: #212121;
+            --radius: 16px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        [data-theme="dark"] {
+            --bg: #121212;
+            --card: #1e1e1e;
+            --primary: #ff6b6b;
+            --primary-dark: #ee5a5a;
+            --secondary: #adb5bd;
+            --text: #f8f9fa;
+            --text-muted: #adb5bd;
+            --border: #333;
+            --belt-white: #2d2d2d;
+            --belt-blue: #1a3a5c;
+            --belt-purple: #3a2a4a;
+            --belt-brown: #3a322a;
+            --belt-black: #000;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding: 12px;
+            font-size: 15px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container { max-width: 650px; margin: 0 auto; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0 16px;
+            padding: 8px 4px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        h1 { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            letter-spacing: -0.3px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .belt-indicator {
+            display: flex;
+            gap: 3px;
+            margin-left: 8px;
+        }
+        
+        .belt-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+        }
+        
+        .belt-dot.active { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary); }
+
+        .controls {
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 12px; 
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .input-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 5px; 
+            flex: 1; 
+            min-width: 0; 
+        }
+        
+        label { 
+            font-size: 0.8rem; 
+            font-weight: 500; 
+            color: var(--text-muted); 
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        input, select, textarea {
+            width: 100%; 
+            padding: 12px 14px;
+            border: 1px solid var(--border); 
+            border-radius: 12px;
+            font-size: 0.95rem; 
+            background: var(--card);
+            color: var(--text);
+            transition: border 0.2s, box-shadow 0.2s;
+        }
+        
+        textarea { min-height: 70px; resize: vertical; }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none; 
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(139, 0, 0, 0.15);
+        }
+
+        .btn {
+            padding: 12px 16px; 
+            border: none; 
+            border-radius: 12px;
+            font-size: 0.95rem; 
+            font-weight: 600; 
+            cursor: pointer;
+            transition: transform 0.1s, opacity 0.2s; 
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        .btn-primary { background: var(--primary); color: #fff; }
+        .btn-outline { 
+            background: transparent; 
+            border: 1px solid var(--border); 
+            color: var(--text);
+            padding: 10px 14px;
+            font-size: 0.9rem;
+        }
+        .btn-sm {
+            padding: 6px 10px; 
+            font-size: 0.8rem; 
+            border-radius: 8px;
+            border: none; 
+            cursor: pointer; 
+            font-weight: 500;
+            min-width: 36px;
+        }
+        .btn-edit { background: rgba(0,122,255,0.15); color: #007AFF; }
+        .btn-del { background: rgba(220,53,69,0.15); color: var(--danger); }
+        .btn-star { background: transparent; color: var(--warning); font-size: 1.1rem; }
+        .btn-star.active { color: #ffcc00; text-shadow: 0 0 2px rgba(0,0,0,0.2); }
+
+        .card {
+            background: var(--card); 
+            border-radius: var(--radius);
+            padding: 14px; 
+            box-shadow: var(--shadow);
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .card.guard { border-left-color: #4a90e2; }
+        .card.pass { border-left-color: #e67e22; }
+        .card.submission { border-left-color: #e74c3c; }
+        .card.sweep { border-left-color: #2ecc71; }
+        .card.defense { border-left-color: #9b59b6; }
+        .card.takedown { border-left-color: #1abc9c; }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        
+        .stat-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            font-size: 0.85rem;
+        }
+        
+        .stat-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin: 2px 0;
+        }
+        
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        
+        .entry-date {
+            font-weight: 600;
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .entry-category {
+            background: rgba(139, 0, 0, 0.1);
+            color: var(--primary);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .entry-title {
+            font-weight: 700;
+            font-size: 1.05rem;
+            margin: 4px 0 6px;
+            line-height: 1.3;
+        }
+        
+        .entry-notes {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+            white-space: pre-wrap;
+        }
+        
+        .entry-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            flex-wrap: wrap;
+        }
+        
+        .entry-actions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            justify-content: flex-end;
+        }
+
+        .rating {
+            display: flex;
+            gap: 2px;
+            margin: 4px 0;
+        }
+
+        .empty { 
+            text-align: center; 
+            padding: 28px 20px; 
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+        
+        .empty-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            opacity: 0.7;
+        }
+
+        .search-bar {
+            margin: 8px 0 12px;
+            position: relative;
+        }
+        
+        .search-bar input {
+            padding-left: 36px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 6px;
+            margin: 8px 0 12px;
+            flex-wrap: wrap;
+        }
+        
+        .chip {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .toast {
+            position: fixed; 
+            bottom: 20px; 
+            left: 12px; 
+            right: 12px;
+            background: var(--card); 
+            color: var(--text); 
+            padding: 12px 18px;
+            border-radius: 14px; 
+            text-align: center; 
+            font-weight: 500;
+            transform: translateY(100px); 
+            transition: transform 0.3s cubic-bezier(0.2,0,0,1);
+            z-index: 1000; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-left: 4px solid var(--success);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .toast.show { transform: translateY(0); }
+        .toast.error { border-left-color: var(--danger); }
+        .toast.info { border-left-color: var(--primary); }
+
+        .theme-toggle {
+            background: none;
+            border: none;
+            font-size: 1.3rem;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text);
+            transition: background 0.2s;
+        }
+        
+        .theme-toggle:hover { background: rgba(0,0,0,0.08); }
+        [data-theme="dark"] .theme-toggle:hover { background: rgba(255,255,255,0.1); }
+
+        .streak-badge {
+            background: linear-gradient(135deg, #ff9a56, #ff6b6b);
+            color: white;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-left: 8px;
+            box-shadow: 0 2px 6px rgba(255,107,107,0.3);
+        }
+
+        .quick-add {
+            background: var(--card);
+            border-radius: var(--radius);
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        .quick-add-title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--secondary);
+        }
+        
+        .technique-suggestions {
+            display: flex;
+            gap: 6px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .suggestion {
+            background: rgba(139, 0, 0, 0.08);
+            color: var(--primary);
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .suggestion:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        @media (max-width: 400px) {
+            h1 { font-size: 1.35rem; }
+            .btn { padding: 14px; font-size: 1rem; }
+            .stats-bar { grid-template-columns: 1fr; }
+            .entry-meta { flex-direction: column; gap: 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1>🥋 BJJ Training Log</h1>
+                <div class="belt-indicator" id="beltIndicator">
+                    <div class="belt-dot" data-belt="white"></div>
+                    <div class="belt-dot" data-belt="blue"></div>
+                    <div class="belt-dot" data-belt="purple"></div>
+                    <div class="belt-dot" data-belt="brown"></div>
+                    <div class="belt-dot" data-belt="black"></div>
+                </div>
+                <span class="streak-badge" id="streakBadge" style="display:none;">🔥 <span id="streakCount">0</span> days</span>
+            </div>
+            <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+        </header>
+
+        <!-- Stats Summary -->
+        <div class="stats-bar">
+            <div class="stat-card">
+                <span class="stat-value" id="totalSessions">0</span>
+                <span class="stat-label">Sessions</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="totalTechniques">0</span>
+                <span class="stat-label">Techniques</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-value" id="avgRating">-</span>
+                <span class="stat-label">Avg. Mastery</span>
+            </div>
+        </div>
+
+        <!-- Quick Add Form -->
+        <div class="quick-add">
+            <div class="quick-add-title">
+                <span>➕ Log Today's Training</span>
+                <button class="btn-outline" style="width:auto;padding:6px 12px;font-size:0.85rem;" onclick="setToday()">📅 Today</button>
+            </div>
+            <form id="logForm" onsubmit="handleSubmit(event)">
+                <input type="hidden" id="editId">
+                <div style="display:flex; gap:10px; margin-bottom:10px;">
+                    <div class="input-group" style="flex:2;">
+                        <label for="date">📅 Date</label>
+                        <input type="date" id="date" required>
+                    </div>
+                    <div class="input-group" style="flex:1.5;">
+                        <label for="category">🎯 Category</label>
+                        <select id="category" required>
+                            <option value="guard">🛡️ Guard</option>
+                            <option value="pass">🚪 Guard Pass</option>
+                            <option value="submission">🔒 Submission</option>
+                            <option value="sweep">🔄 Sweep</option>
+                            <option value="defense">🛡️ Defense</option>
+                            <option value="takedown">🤼 Takedown</option>
+                            <option value="other">✨ Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="input-group" style="margin-bottom:10px;">
+                    <label for="technique">🥋 Technique Name</label>
+                    <input type="text" id="technique" placeholder="e.g., Spider Guard Sweep, Armbar from Mount" required autocomplete="off" list="techniqueList">
+                    <datalist id="techniqueList"></datalist>
+                </div>
+                <div class="input-group" style="margin-bottom:10px;">
+                    <label for="notes">📝 Notes / Details</label>
+                    <textarea id="notes" placeholder="What worked? What to improve? Partner tips?"></textarea>
+                </div>
+                <div style="display:flex; gap:10px; margin-bottom:12px; align-items:center;">
+                    <div class="input-group" style="flex:1;">
+                        <label for="partner">🤝 Training Partner</label>
+                        <input type="text" id="partner" placeholder="Optional">
+                    </div>
+                    <div class="input-group" style="flex:1;">
+                        <label>⭐ Mastery Level</label>
+                        <div class="rating" id="ratingInput">
+                            <button type="button" class="btn-sm btn-star" data-rating="1">☆</button>
+                            <button type="button" class="btn-sm btn-star" data-rating="2">☆</button>
+                            <button type="button" class="btn-sm btn-star" data-rating="3">☆</button>
+                            <button type="button" class="btn-sm btn-star" data-rating="4">☆</button>
+                            <button type="button" class="btn-sm btn-star" data-rating="5">☆</button>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" id="ratingValue" value="3">
+                <button type="submit" class="btn btn-primary" id="submitBtn">💾 Save Technique</button>
+            </form>
+            
+            <!-- Technique Suggestions -->
+            <div class="technique-suggestions" id="suggestions" style="display:none;">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+
+        <!-- Search & Filters -->
+        <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Search techniques, notes, partners..." oninput="renderEntries()">
+        </div>
+        
+        <div class="filter-chips">
+            <div class="chip active" data-filter="all">All</div>
+            <div class="chip" data-filter="guard">Guard</div>
+            <div class="chip" data-filter="submission">Submissions</div>
+            <div class="chip" data-filter="thisweek">This Week</div>
+            <div class="chip" data-filter="favorites">⭐ Favorites</div>
+        </div>
+
+        <!-- Entries List -->
+        <div id="entriesContainer">
+            <div class="empty" id="emptyState">
+                <div class="empty-icon">🥋</div>
+                <p>No techniques logged yet.<br>Start your journey by adding your first technique above!</p>
+            </div>
+            <div id="entriesList"></div>
+        </div>
+
+        <!-- Actions -->
+        <div style="display:flex; gap:10px; margin:16px 0;">
+            <button class="btn btn-outline" onclick="exportCSV()">📥 Export to CSV</button>
+            <button class="btn btn-outline" onclick="clearAllData()" style="border-color:var(--danger);color:var(--danger);">🗑️ Clear All</button>
+        </div>
+        
+        <p style="text-align:center; color:var(--text-muted); font-size:0.8rem; margin-top:8px; padding-bottom:24px;">
+            Data saved locally • OSSU! 🤙
+        </p>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ===== STATE & INIT =====
+        let entries = [];
+        let currentBelt = 'white'; // white, blue, purple, brown, black
+        let currentRating = 3;
+        const KEY = 'bjj_training_log_v1';
+        const BELT_ORDER = ['white', 'blue', 'purple', 'brown', 'black'];
+        const CATEGORIES = {
+            guard: { label: 'Guard', color: '#4a90e2' },
+            pass: { label: 'Guard Pass', color: '#e67e22' },
+            submission: { label: 'Submission', color: '#e74c3c' },
+            sweep: { label: 'Sweep', color: '#2ecc71' },
+            defense: { label: 'Defense', color: '#9b59b6' },
+            takedown: { label: 'Takedown', color: '#1abc9c' },
+            other: { label: 'Other', color: '#95a5a6' }
+        };
+
+        function init() {
+            // Load data
+            const saved = localStorage.getItem(KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                entries = parsed.entries || [];
+                currentBelt = parsed.belt || 'white';
+            }
+            
+            // Set today's date
+            setToday();
+            
+            // Setup rating buttons
+            document.querySelectorAll('#ratingInput .btn-star').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const rating = parseInt(e.currentTarget.dataset.rating);
+                    currentRating = rating;
+                    document.getElementById('ratingValue').value = rating;
+                    updateRatingUI(rating);
+                });
+            });
+            
+            // Belt indicator
+            updateBeltIndicator();
+            
+            // Theme
+            const savedTheme = localStorage.getItem('bjj_theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.getElementById('themeToggle').textContent = '☀️';
+            }
+            
+            // Event listeners
+            document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+            document.querySelectorAll('.chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                    chip.classList.add('active');
+                    renderEntries();
+                });
+            });
+            
+            // Technique autocomplete
+            document.getElementById('technique').addEventListener('input', updateSuggestions);
+            
+            // Render
+            renderEntries();
+            updateStats();
+            updateTechniqueDatalist();
+        }
+
+        function setToday() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').value = today;
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const newTheme = isDark ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            document.getElementById('themeToggle').textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('bjj_theme', newTheme);
+        }
+
+        function updateBeltIndicator() {
+            const dots = document.querySelectorAll('.belt-dot');
+            const currentIndex = BELT_ORDER.indexOf(currentBelt);
+            dots.forEach((dot, i) => {
+                dot.classList.toggle('active', i <= currentIndex);
+                dot.style.background = i <= currentIndex ? `var(--belt-${BELT_ORDER[i]})` : 'transparent';
+            });
+            
+            // Update streak badge
+            updateStreakBadge();
+        }
+
+        function updateStreakBadge() {
+            // Calculate current training streak
+            if (entries.length === 0) {
+                document.getElementById('streakBadge').style.display = 'none';
+                return;
+            }
+            
+            const dates = [...new Set(entries.map(e => e.date))].sort().reverse();
+            let streak = 0;
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            
+            for (let i = 0; i < dates.length; i++) {
+                const entryDate = new Date(dates[i] + 'T00:00:00');
+                entryDate.setHours(0,0,0,0);
+                const diffDays = Math.floor((today - entryDate) / (1000*60*60*24));
+                
+                if (diffDays === streak || diffDays === streak + 1) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            
+            const badge = document.getElementById('streakBadge');
+            if (streak >= 2) {
+                document.getElementById('streakCount').textContent = streak;
+                badge.style.display = 'inline-flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        function updateRatingUI(rating) {
+            document.querySelectorAll('#ratingInput .btn-star').forEach((btn, i) => {
+                const starRating = i + 1;
+                btn.textContent = starRating <= rating ? '★' : '☆';
+                btn.classList.toggle('active', starRating <= rating);
+            });
+        }
+
+        function updateSuggestions() {
+            const query = document.getElementById('technique').value.toLowerCase().trim();
+            const suggestionsEl = document.getElementById('suggestions');
+            
+            if (query.length < 2) {
+                suggestionsEl.style.display = 'none';
+                return;
+            }
+            
+            // Get unique past techniques matching query
+            const matches = [...new Set(
+                entries
+                    .filter(e => e.technique.toLowerCase().includes(query))
+                    .map(e => e.technique)
+            )].slice(0, 5);
+            
+            if (matches.length === 0) {
+                suggestionsEl.style.display = 'none';
+                return;
+            }
+            
+            suggestionsEl.innerHTML = matches.map(t => 
+                `<div class="suggestion" onclick="useSuggestion('${escapeHtml(t)}')">${escapeHtml(t)}</div>`
+            ).join('');
+            suggestionsEl.style.display = 'flex';
+        }
+
+        function useSuggestion(technique) {
+            document.getElementById('technique').value = technique;
+            document.getElementById('suggestions').style.display = 'none';
+            document.getElementById('notes').focus();
+        }
+
+        function handleSubmit(e) {
+            e.preventDefault();
+            
+            const id = document.getElementById('editId').value;
+            const date = document.getElementById('date').value;
+            const category = document.getElementById('category').value;
+            const technique = document.getElementById('technique').value.trim();
+            const notes = document.getElementById('notes').value.trim();
+            const partner = document.getElementById('partner').value.trim();
+            const rating = parseInt(document.getElementById('ratingValue').value) || 3;
+            
+            if (!date || !technique) {
+                toast('Please fill in date and technique name', 'error');
+                return;
+            }
+            
+            const entry = {
+                id: id || Date.now().toString(),
+                date,
+                category,
+                technique,
+                notes,
+                partner,
+                rating,
+                timestamp: new Date().toISOString()
+            };
+            
+            if (id) {
+                // Update existing
+                const idx = entries.findIndex(x => x.id === id);
+                if (idx > -1) entries[idx] = entry;
+                toast('Technique updated ✅');
+            } else {
+                // Add new
+                entries.unshift(entry); // Add to top for chronological view
+                toast('New technique logged! 🥋');
+                
+                // Auto-advance belt every 50 techniques (fun gamification)
+                const totalTech = entries.filter(e => !e.isDeleted).length;
+                if (totalTech > 0 && totalTech % 50 === 0) {
+                    const currentIndex = BELT_ORDER.indexOf(currentBelt);
+                    if (currentIndex < BELT_ORDER.length - 1) {
+                        currentBelt = BELT_ORDER[currentIndex + 1];
+                        toast(`🎉 Belt promoted to ${currentBelt.toUpperCase()}!`, 'info');
+                        updateBeltIndicator();
+                    }
+                }
+            }
+            
+            save();
+            resetForm();
+            renderEntries();
+            updateStats();
+            updateTechniqueDatalist();
+        }
+
+        function editEntry(id) {
+            const entry = entries.find(e => e.id === id);
+            if (!entry) return;
+            
+            document.getElementById('editId').value = entry.id;
+            document.getElementById('date').value = entry.date;
+            document.getElementById('category').value = entry.category;
+            document.getElementById('technique').value = entry.technique;
+            document.getElementById('notes').value = entry.notes || '';
+            document.getElementById('partner').value = entry.partner || '';
+            currentRating = entry.rating || 3;
+            document.getElementById('ratingValue').value = currentRating;
+            updateRatingUI(currentRating);
+            
+            document.getElementById('submitBtn').textContent = '💾 Update Technique';
+            document.getElementById('submitBtn').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        function deleteEntry(id) {
+            if (!confirm('Delete this technique entry?')) return;
+            entries = entries.filter(e => e.id !== id);
+            save();
+            renderEntries();
+            updateStats();
+            toast('Entry deleted', 'info');
+        }
+
+        function resetForm() {
+            document.getElementById('editId').value = '';
+            document.getElementById('technique').value = '';
+            document.getElementById('notes').value = '';
+            document.getElementById('partner').value = '';
+            currentRating = 3;
+            document.getElementById('ratingValue').value = '3';
+            updateRatingUI(3);
+            document.getElementById('submitBtn').textContent = '💾 Save Technique';
+            document.getElementById('suggestions').style.display = 'none';
+        }
+
+        function renderEntries() {
+            const container = document.getElementById('entriesList');
+            const empty = document.getElementById('emptyState');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            const activeFilter = document.querySelector('.chip.active').dataset.filter;
+            
+            let filtered = [...entries];
+            
+            // Apply filters
+            if (activeFilter === 'thisweek') {
+                const weekAgo = new Date();
+                weekAgo.setDate(weekAgo.getDate() - 7);
+                filtered = filtered.filter(e => new Date(e.date) >= weekAgo);
+            } else if (activeFilter === 'favorites') {
+                filtered = filtered.filter(e => e.rating >= 4);
+            } else if (activeFilter !== 'all' && CATEGORIES[activeFilter]) {
+                filtered = filtered.filter(e => e.category === activeFilter);
+            }
+            
+            // Apply search
+            if (searchQuery) {
+                filtered = filtered.filter(e => 
+                    e.technique.toLowerCase().includes(searchQuery) ||
+                    (e.notes && e.notes.toLowerCase().includes(searchQuery)) ||
+                    (e.partner && e.partner.toLowerCase().includes(searchQuery))
+                );
+            }
+            
+            // Sort: newest first
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            if (filtered.length === 0) {
+                empty.style.display = 'block';
+                container.innerHTML = '';
+                return;
+            }
+            
+            empty.style.display = 'none';
+            
+            container.innerHTML = filtered.map(entry => {
+                const cat = CATEGORIES[entry.category] || CATEGORIES.other;
+                const dateObj = new Date(entry.date + 'T00:00:00');
+                const dateStr = dateObj.toLocaleDateString('en-US', { 
+                    weekday: 'short', 
+                    month: 'short', 
+                    day: 'numeric' 
+                });
+                
+                return `
+                <div class="card ${entry.category}" data-id="${entry.id}">
+                    <div class="entry-header">
+                        <span class="entry-date">${dateStr}</span>
+                        <span class="entry-category" style="background:${cat.color}20;color:${cat.color}">${cat.label}</span>
+                    </div>
+                    <div class="entry-title">${escapeHtml(entry.technique)}</div>
+                    ${entry.notes ? `<div class="entry-notes">${escapeHtml(entry.notes)}</div>` : ''}
+                    <div class="entry-meta">
+                        ${entry.partner ? `<span>🤝 ${escapeHtml(entry.partner)}</span>` : ''}
+                        <span>⭐ ${'★'.repeat(entry.rating)}${'☆'.repeat(5-entry.rating)}</span>
+                    </div>
+                    <div class="entry-actions">
+                        <button class="btn-sm btn-edit" onclick="editEntry('${entry.id}')" aria-label="Edit">✏️</button>
+                        <button class="btn-sm btn-del" onclick="deleteEntry('${entry.id}')" aria-label="Delete">🗑️</button>
+                    </div>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            const validEntries = entries.filter(e => !e.isDeleted);
+            document.getElementById('totalSessions').textContent = 
+                [...new Set(validEntries.map(e => e.date))].length;
+            document.getElementById('totalTechniques').textContent = validEntries.length;
+            
+            const avgRating = validEntries.length > 0 
+                ? (validEntries.reduce((sum, e) => sum + (e.rating || 3), 0) / validEntries.length).toFixed(1)
+                : '-';
+            document.getElementById('avgRating').textContent = avgRating;
+        }
+
+        function updateTechniqueDatalist() {
+            const datalist = document.getElementById('techniqueList');
+            const techniques = [...new Set(entries.map(e => e.technique))].slice(0, 50);
+            datalist.innerHTML = techniques.map(t => `<option value="${escapeHtml(t)}">`).join('');
+        }
+
+        function exportCSV() {
+            if (entries.length === 0) {
+                toast('No data to export', 'info');
+                return;
+            }
+            
+            const headers = ['Date', 'Category', 'Technique', 'Notes', 'Partner', 'Rating (1-5)'];
+            let csv = '\uFEFF' + headers.join(',') + '\r\n';
+            
+            entries
+                .filter(e => !e.isDeleted)
+                .sort((a,b) => new Date(a.date) - new Date(b.date))
+                .forEach(e => {
+                    const row = [
+                        e.date,
+                        CATEGORIES[e.category]?.label || e.category,
+                        `"${(e.technique || '').replace(/"/g, '""')}"`,
+                        `"${(e.notes || '').replace(/"/g, '""')}"`,
+                        `"${(e.partner || '').replace(/"/g, '""')}"`,
+                        e.rating || 3
+                    ];
+                    csv += row.join(',') + '\r\n';
+                });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `BJJ_Training_Log_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            toast('Exported to CSV ✅');
+        }
+
+        function clearAllData() {
+            if (!confirm('⚠️ Delete ALL training data? This cannot be undone.')) return;
+            if (!confirm('Really? Type "OSSU" to confirm:', true)) return;
+            const confirmation = prompt('Type "OSSU" to confirm deletion:');
+            if (confirmation !== 'OSSU') {
+                toast('Cancelled', 'info');
+                return;
+            }
+            
+            entries = [];
+            currentBelt = 'white';
+            save();
+            renderEntries();
+            updateStats();
+            updateBeltIndicator();
+            toast('All data cleared', 'info');
+        }
+
+        function save() {
+            localStorage.setItem(KEY, JSON.stringify({
+                entries,
+                belt: currentBelt,
+                lastBackup: new Date().toISOString()
+            }));
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            const d = document.createElement('div');
+            d.textContent = str;
+            return d.innerHTML;
+        }
+
+        function toast(msg, type = 'success') {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.className = 'toast show';
+            if (type === 'error') t.classList.add('error');
+            if (type === 'info') t.classList.add('info');
+            setTimeout(() => t.classList.remove('show'), 2800);
+        }
+
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>
